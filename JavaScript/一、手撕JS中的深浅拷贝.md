@@ -1,28 +1,12 @@
-## JavaScript系列： 一、手撕JS中的深浅拷贝
-
-### 前言
-
-面试官：手写一个深拷贝？
-
-应聘者： JSON.parse(JSON.stringify(object))
-
-面试官：有什么优缺点？
-
-应聘者：忘记了。。。
-
-面试官：有其他方法？ 怎么解决循环引用？
-
-应聘者：。。。
-
 ### 一、数据类型
 
-#### 1.基本数据类型
+#### 1、基本数据类型
 
 Number、String、Boolean、Null、undefined、Symbol、Bigint
 
-Bigint是最近新引入的基本数据类型
+Bigint 是最近新引入的基本数据类型
 
-#### 2.引用数据类型
+#### 2、引用数据类型
 
 对象、数组、函数
 
@@ -30,8 +14,9 @@ Bigint是最近新引入的基本数据类型
 
 
 
-[**注**]： 下面是要copy的对象, 之后的代码都会直接使用$obj， 之后不会再次声明
-
+```! 
+下面是要copy的对象, 之后的代码都会直接使用$obj， 之后不会再次声明
+```
 ```js
 // lmran
 var $obj = {
@@ -56,11 +41,11 @@ $obj.c.d = $obj
 
 ### 二、 浅拷贝
 
-#### 1. 什么是浅拷贝
+#### 1、什么是浅拷贝
 
 一句话可以说就是：对对象而言，它的第一层属性值如果是基本数据类型则完全拷贝一份数据，如果是引用类型就拷贝内存地址。确实拷贝的很浅[偷笑]
 
-#### 2.实现
+#### 2、实现
 
 - `Object.assign()`
 
@@ -105,7 +90,8 @@ $obj.c.d = $obj
   console.log(obj2) // {name: "haha", res: {value: 456}}
   console.log(obj1) // {name: "yang", res: {value: 456}}
   ```
-- 
+
+- 对于数组实现浅拷贝还可以使用**slice**、**concat**
 
 ### 三、深拷贝
 
@@ -118,16 +104,16 @@ $obj.c.d = $obj
 - 暴力版本 ` JSON.parse(JSON.stringify(object)) `
 
   ```js
-  
-  let obj = JSON.parse(JSON.stringify(obj))
+  // lmran
+  let obj = JSON.parse(JSON.stringify($obj))
   console.log(obj) 			// 不能解决循环引用
   /*
   	VM348:1 Uncaught TypeError: Converting circular structure to JSON
       at JSON.stringify (<anonymous>)
       at <anonymous>:1:17
   */
-  delete obj.c.d
-  let obj = JSON.parse(JSON.stringify(obj))
+  delete $obj.c.d
+  let obj = JSON.parse(JSON.stringify($obj))
   console.log(obj) 			// 丢失了大部分属性
   /*
   	{
@@ -136,7 +122,7 @@ $obj.c.d = $obj
           date: "2020-04-05T09:51:32.610Z"
           e: {}
           f: {}
-      }
+    }
   */
   ```
 
@@ -159,8 +145,9 @@ $obj.c.d = $obj
 - 第一版
 
   递归遍历对象属性 
-  
+
   ```js
+  // lmran
   function deepCopy (obj) {
       if (obj === null || typeof obj !== 'object') {
           return obj
@@ -196,15 +183,15 @@ $obj.c.d = $obj
   }
   */
   ```
-  
+
   存在的问题是： 
-  
+
   1、不能解决循环引用的对象
-  
+
   2、不能正确处理`new Date()`
-  
+
   3、不能处理正则
-  
+
   4、不能处理new Error()
 
 - 第二版
@@ -212,6 +199,7 @@ $obj.c.d = $obj
   先解决解决循环遍历问题， 解决办法是将对象，对象属性存储在数组中查看下次遍历时有无已经遍历过的对象，有则直接返回， 否则继续遍历
 
 ```js
+// lmran
 function deepCopy (obj, cache = []) {
     if (obj === null || typeof obj !== 'object') {
         return obj
@@ -254,6 +242,7 @@ deepCopy($obj)
   对于最终的几个对象的处理，可以判断类型， 重新new一个返回就可以了
 
 ```js
+// lmran
 function deepCopy (obj, cache = []) {
     if (obj === null || typeof obj !== 'object') {
         return obj
@@ -292,9 +281,8 @@ deepCopy($obj)
 */
 ```
 
-  
+  ### 总结
 
+至此, 深浅拷贝已全部实现，但学无止境，我们可以考虑使用 `Proxy`提升深拷贝性能，通过拦截 `set` 和 `get` 实现，当然 `Object.defineProperty()` 也可以。感兴趣的同学可以查看这文章，文章介绍的很详细[头条面试官：你知道如何实现高性能版本的深拷贝嘛？]( https://juejin.im/post/5df7175fe51d45582512962c )
 
-
-
-
+文章中有什么问题， 欢迎大家积极指出， 不胜感激！！！
